@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.optimize import curve_fit
 
 
@@ -11,6 +12,10 @@ class analizer:
         self.time_values = range(len(data))
 
     def fit(self):
-        popt, pcov = curve_fit(self.function, self.time_values, self.data, p0=self.initialGuess)
-        print(popt)
+        try:
+            popt, pcov = curve_fit(self.function, self.time_values, self.data, p0=self.initialGuess)
+            print(popt)
+        except RuntimeError as e:
+            print(e)
+            return None, [0, np.argmax(self.data)]
         return self.function(self.time_values, *popt), popt
