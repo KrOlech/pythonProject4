@@ -5,9 +5,10 @@ from scipy.optimize import curve_fit
 from Ploter import ploter
 from analize import analizer
 from furier import resolveFurier
-from main import resolvData, read_csv_file
+from main import resolvData, read_csv_file, read_kolumns
 
-file_paths = [rf"Data\Norm_map_zwobble_{i}_detectorSum_ROI_Cr.csv" for i in range(1, 7, 1)]
+# file_paths = [rf"Data\Norm_map_zwobble_{i}_detectorSum_ROI_Cr.csv" for i in range(1, 7, 1)]
+file_path_ = r"Data\centers.csv"
 
 
 # Define the sinusoidal function
@@ -19,10 +20,25 @@ def sinusoidal_function(t, amplitude, frequency, phase):
     return amplitude * np.sin(2 * np.pi * frequency * t + phase)
 
 
-for file_path in file_paths:
+data = np.array(read_kolumns(file_path_), dtype=float)
+res = np.zeros_like(data[0])
+w = len(data[1:])
+print(w)
+
+for d in data[1:2]:
+    for i, v in enumerate(d):
+        res[i] += v
+
+for d in data[-2:]:
+    for i, v in enumerate(d):
+        res[-i-1] += v
+res /= 2
+
+for file_path, amplitude_values in enumerate((res,)):
+    file_path = "Data\\" + str(file_path)+"srednia"
     print(file_path)
 
-    amplitude_values = resolvData(np.array(read_csv_file(file_path), dtype=float))
+    # amplitude_values = resolvData(np.array(read_csv_file(file_path), dtype=float))
 
     time_values = range(len(amplitude_values))  # Time values
 
@@ -32,13 +48,13 @@ for file_path in file_paths:
 
     fitted_amplitude, fitted_frequency, fitted_phase = popt
 
-    fitted_function, _ = analizer(amplitude_values,
-                                  lambda x, a, b, f=fitted_function: f[x] + a * x + b,
-                                  [0, 0]).fit()
-
     fitted_function, popt = analizer(amplitude_values,
                                      lambda x, A, B, C, f=fitted_function: f[x] * (A * x * x + B * x + C),
                                      [0, 0, fitted_amplitude]).fit()
+
+    fitted_function, _ = analizer(amplitude_values,
+                                  lambda x, a, b, f=fitted_function: f[x] + a * x + b,
+                                  [0, 0]).fit()
 
     for _ in range(5):
         fft_result = resolveFurier(fitted_function - amplitude_values).fff()

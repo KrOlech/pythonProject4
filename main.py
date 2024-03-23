@@ -1,3 +1,5 @@
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
@@ -18,6 +20,16 @@ def read_csv_file(file_path):
         table = [row for row in csv.reader(file)]
 
     return table
+
+def read_kolumns(file_path):
+
+    # Open the CSV file in read mode
+    with open(file_path, 'r') as file:
+        tab = [ [] for _ in range(12)]
+        for row in csv.reader(file):
+            for i, d in enumerate(row):
+                tab[i].append(d)
+    return tab
 
 
 def gauss(x, sigma, mi):
